@@ -18,6 +18,11 @@ class PokemonDetailScreen extends StatefulWidget {
 }
 
 class _PokemonDetailScreenState extends State<PokemonDetailScreen> {
+  String getImageUrl(String number) {
+    // Remove leading zeros and file extension if present
+    number = number.replaceAll(RegExp(r'^0+'), '').replaceAll('.png', '');
+    return "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/$number.png";
+  }
   @override
   Widget build(BuildContext context) {
     var width = MediaQuery.of(context).size.width;
@@ -326,11 +331,11 @@ class _PokemonDetailScreenState extends State<PokemonDetailScreen> {
             ),
           ),
           Positioned(
-            top: height * 0.16,
+            top: height * 0.15,
               left: (width/2)-90,
               child: CachedNetworkImage(
-                imageUrl: widget.pokemonDetail['img'],
-                height: 240,
+                imageUrl: getImageUrl(widget.pokemonDetail['num']),
+                height: 280,
                 fit: BoxFit.fitHeight,
           ))
         ],
