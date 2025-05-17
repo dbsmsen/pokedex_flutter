@@ -13,7 +13,14 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   var pokeApi =
       "https://raw.githubusercontent.com/Biuni/PokemonGO-Pokedex/master/pokedex.json";
-  late List pokedex;
+  String getImageUrl(String number) {
+    // Remove leading zeros and file extension if present
+    number = number.replaceAll(RegExp(r'^0+'), '').replaceAll('.png', '');
+    var url = "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/$number.png";
+    print('Generated URL for Pokemon $number: $url');
+    return url;
+  }
+  List? pokedex;
 
   @override
   void initState() {
@@ -37,6 +44,10 @@ class _HomeScreenState extends State<HomeScreen> {
             'images/pokeball.png',
             width: 200,
             fit: BoxFit.fitWidth,
+            errorBuilder: (context, error, stackTrace) {
+              print('Error loading pokeball.png: $error');
+              return const SizedBox(width: 200);
+            },
           ),
         ),
         Positioned(
@@ -56,16 +67,16 @@ class _HomeScreenState extends State<HomeScreen> {
           width: width,
           child: Column(
             children: [
-              if (pokedex != null)
+              if (pokedex?.isNotEmpty ?? false)
                 Expanded(
                     child: GridView.builder(
                         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                           crossAxisCount: 2,
                           childAspectRatio: 1.4,
                         ),
-                        itemCount: pokedex.length,
+                        itemCount: pokedex?.length ?? 0,
                         itemBuilder: (context, index) {
-                          var type = pokedex[index]['type'][0];
+                          var type = pokedex?[index]['type'][0] ?? '';
                           return InkWell(
                             child: Padding(
                               padding: const EdgeInsets.symmetric(
@@ -126,7 +137,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                       top: 20,
                                       left: 10,
                                       child: Text(
-                                        pokedex[index]['name'],
+                                        pokedex?[index]['name'] ?? 'Unknown',
                                         style: TextStyle(
                                           fontWeight: FontWeight.bold,
                                           fontSize: 18,
@@ -160,12 +171,16 @@ class _HomeScreenState extends State<HomeScreen> {
                                       ),
                                     ),
                                     Positioned(
-                                        bottom: 5,
+                                        bottom: 4,
                                         right: 5,
                                         child: CachedNetworkImage(
-                                          imageUrl: pokedex[index]['img'],
-                                          height: 100,
-                                          fit: BoxFit.fitHeight,
+                                          imageUrl: getImageUrl(pokedex?[index]['num'] ?? '1'),
+                                          height: height * 0.20, // Making image height 18% of screen height
+                                          fit: BoxFit.contain,
+                                          errorWidget: (context, url, error) {
+                                            print('Error loading Pokemon image: $error');
+                                            return const Icon(Icons.catching_pokemon);
+                                          },
                                         )),
                                   ],
                                 ),
@@ -176,7 +191,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                   context,
                                   MaterialPageRoute(
                                       builder: (_) => PokemonDetailScreen(
-                                            pokemonDetail: pokedex[index],
+                                            pokemonDetail: pokedex?[index],
                                             color: type == 'Grass'
                                                 ? Colors.green
                                                 : type == 'Fire'
@@ -238,7 +253,15 @@ class _HomeScreenState extends State<HomeScreen> {
         var decodedJsonData = jsonDecode(value.body);
         print(decodedJsonData);
         pokedex = decodedJsonData['pokemon'];
-        print(pokedex[0]['name']);
+        // Update image URLs to use PokeAPI
+        if (pokedex != null) {
+          for (var pokemon in pokedex!) {
+            pokemon['img'] = getImageUrl(pokemon['num']);
+          }
+        }
+        if (pokedex != null && pokedex!.isNotEmpty) {
+          print('First Pokemon data: ${pokedex![0]}');
+        }
         setState(() {});
       }
     });
