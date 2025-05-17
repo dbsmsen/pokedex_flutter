@@ -1,0 +1,2 @@
+C:/Users/Debsoomonto/StudioProjects/Pokedex/android/app/.cxx/RelWithDebInfo/5a6v1t1m/arm64-v8a/CMakeFiles/edit_cache.dir
+C:/Users/Debsoomonto/StudioProjects/Pokedex/android/app/.cxx/RelWithDebInfo/5a6v1t1m/arm64-v8a/CMakeFiles/rebuild_cache.dir
